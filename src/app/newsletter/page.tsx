@@ -44,23 +44,23 @@ function ArticleCard({ article, index, featured = false }: { article: Article; i
       href={article.source_url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`block group ${featured ? "col-span-2" : ""}`}
+      className={`block group ${featured ? "col-span-2 sm:col-span-2" : ""}`}
     >
       <div className="overflow-hidden rounded-xl">
         <img
           src={getImage(article, index)}
           alt={article.title}
-          className={`w-full object-cover group-hover:scale-105 transition-transform duration-300 ${featured ? "h-72" : "h-52"}`}
+          className={`w-full object-cover group-hover:scale-105 transition-transform duration-300 ${featured ? "h-48 sm:h-72" : "h-40 sm:h-52"}`}
         />
       </div>
       <div className="mt-3">
         <span className="text-xs font-semibold uppercase tracking-wider text-blue-600">
           {article.topic}
         </span>
-        <h3 className={`font-bold mt-1 text-gray-900 group-hover:text-green-600 transition-colors ${featured ? "text-2xl" : "text-base"}`}>
+        <h3 className={`font-bold mt-1 text-gray-900 group-hover:text-green-600 transition-colors ${featured ? "text-xl sm:text-2xl" : "text-base"}`}>
           {article.title}
         </h3>
-        <p className={`text-gray-600 mt-2 line-clamp-3 ${featured ? "text-base" : "text-sm"}`}>
+        <p className={`text-gray-600 mt-2 ${featured ? "text-base" : "text-sm sm:line-clamp-3"}`}>
           {article.deep_read_content || article.summary}
         </p>
         <span className="text-green-600 text-sm font-medium mt-2 inline-block">
@@ -129,31 +129,29 @@ function NewsletterContent() {
   if (!newsletter) return null;
 
   const allArticles = [newsletter.main_article, ...newsletter.supporting_articles];
-  const visibleArticles = unlocked ? allArticles : allArticles.slice(0, 2);
+  const visibleArticles = unlocked ? allArticles : allArticles.slice(0, 1);
 
   return (
     <div>
-      <a href="/topics" className="inline-flex items-center text-gray-500 hover:text-gray-900 text-sm mb-4 transition-colors">
-        &larr; Back to Topics
-      </a>
-      <h1 className="text-3xl font-bold mb-1">Your FitBrief</h1>
-      <p className="text-gray-600 mb-4">
-        {new Date().toLocaleDateString("en-IN", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
-
-      <div className="mb-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Your FitBrief</h1>
+          <p className="text-gray-600">
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+        </div>
         <ShareBar
           url={typeof window !== "undefined" ? window.location.href : ""}
           text="Check out today's FitBrief — a personalized fitness newsletter!"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {visibleArticles.map((article, i) => (
           <ArticleCard key={i} article={article} index={i} featured={i === 0} />
         ))}
