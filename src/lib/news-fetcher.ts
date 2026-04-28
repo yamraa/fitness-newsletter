@@ -37,25 +37,26 @@ const RSS_FEEDS: Record<string, string[]> = {
   ],
 };
 
-async function fetchFromNewsAPI(topic: string): Promise<RawArticle[]> {
-  const apiKey = process.env.NEWS_API_KEY;
-  if (!apiKey) return [];
+async function fetchFromGoogleCSE(topic: string): Promise<RawArticle[]> {
+  const apiKey = process.env.GOOGLE_CSE_API_KEY;
+  const cx = process.env.GOOGLE_CSE_CX;
+  if (!apiKey || !cx) return [];
 
-  const query = encodeURIComponent(topic);
-  const url = `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`;
+  const query = encodeURIComponent(`${topic} fitness blog`);
+  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}&num=5&dateRestrict=d7`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
-    if (data.status !== "ok") return [];
+    if (!data.items) return [];
 
-    return data.articles.map((a: { title: string; url: string }) => ({
-      title: a.title,
-      url: a.url,
+    return data.items.map((item: { title: string; link: string }) => ({
+      title: item.title,
+      url: item.link,
       topic,
     }));
   } catch {
-    console.error(`NewsAPI fetch failed for topic: ${topic}`);
+    console.error(`Google CSE fetch failed for topic: ${topic}`);
     return [];
   }
 }
@@ -87,7 +88,7 @@ export async function fetchArticlesForTopics(
   const allArticles: RawArticle[] = [];
 
   const fetches = topics.flatMap((topic) => [
-    fetchFromNewsAPI(topic),
+    fetchFromGoogleCSE(topic),
     fetchFromRSS(topic),
   ]);
 
