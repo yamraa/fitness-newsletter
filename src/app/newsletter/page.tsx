@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PhoneGate from "@/components/PhoneGate";
+import ShareBar from "@/components/ShareBar";
 
 interface Article {
   title: string;
@@ -136,7 +137,7 @@ function NewsletterContent() {
         &larr; Back to Topics
       </a>
       <h1 className="text-3xl font-bold mb-1">Your FitBrief</h1>
-      <p className="text-gray-600 mb-8">
+      <p className="text-gray-600 mb-4">
         {new Date().toLocaleDateString("en-IN", {
           weekday: "long",
           year: "numeric",
@@ -144,6 +145,13 @@ function NewsletterContent() {
           day: "numeric",
         })}
       </p>
+
+      <div className="mb-8">
+        <ShareBar
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          text="Check out today's FitBrief — a personalized fitness newsletter!"
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-6">
         {visibleArticles.map((article, i) => (
