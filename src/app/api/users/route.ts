@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, phone, topics } = body;
+  const { name, country_code, phone, topics } = body;
 
   if (!name || !phone || !topics || topics.length === 0) {
     return NextResponse.json(
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      console.error("Failed to update user:", error);
       return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
     }
 
@@ -38,11 +39,12 @@ export async function POST(request: NextRequest) {
   // Create new entry in quizzes
   const { data, error } = await supabase
     .from("quizzes")
-    .insert({ creator_name: name, country_code: "+91", phone, topics, answers: {} })
+    .insert({ id: Math.floor(100000 + Math.random() * 900000), creator_name: name, country_code: country_code || "+91", phone, topics, answers: {} })
     .select()
     .single();
 
   if (error) {
+    console.error("Failed to create user:", error);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 

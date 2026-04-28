@@ -2,22 +2,85 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import NewsletterTeaser from "@/components/NewsletterTeaser";
-import NewsletterFull from "@/components/NewsletterFull";
 import PhoneGate from "@/components/PhoneGate";
+
+interface Article {
+  title: string;
+  source_url: string;
+  topic: string;
+  summary?: string;
+  deep_read_content?: string;
+  image_url?: string;
+}
+
+interface NewsletterData {
+  main_article: Article;
+  supporting_articles: Article[];
+}
+
+const PLACEHOLDER_IMAGES = [
+  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&h=400&fit=crop",
+];
+
+function getImage(article: Article, index: number) {
+  return article.image_url || PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+}
+
+function ArticleCard({ article, index, featured = false }: { article: Article; index: number; featured?: boolean }) {
+  return (
+    <a
+      href={article.source_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`block group ${featured ? "col-span-2" : ""}`}
+    >
+      <div className="overflow-hidden rounded-xl">
+        <img
+          src={getImage(article, index)}
+          alt={article.title}
+          className={`w-full object-cover group-hover:scale-105 transition-transform duration-300 ${featured ? "h-72" : "h-52"}`}
+        />
+      </div>
+      <div className="mt-3">
+        <span className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+          {article.topic}
+        </span>
+        <h3 className={`font-bold mt-1 text-gray-900 group-hover:text-green-600 transition-colors ${featured ? "text-2xl" : "text-base"}`}>
+          {article.title}
+        </h3>
+        <p className={`text-gray-600 mt-2 line-clamp-3 ${featured ? "text-base" : "text-sm"}`}>
+          {article.deep_read_content || article.summary}
+        </p>
+        <span className="text-green-600 text-sm font-medium mt-2 inline-block">
+          Read More &rarr;
+        </span>
+      </div>
+    </a>
+  );
+}
 
 function NewsletterContent() {
   const searchParams = useSearchParams();
   const topicsParam = searchParams.get("topics") || "";
   const topics = topicsParam.split(",").map((t) => decodeURIComponent(t.trim()));
 
-  const [html, setHtml] = useState<string | null>(null);
+  const [newsletter, setNewsletter] = useState<NewsletterData | null>(null);
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Check if returning user
     const savedPhone = localStorage.getItem("fitbrief_phone");
     if (savedPhone) {
       setUnlocked(true);
@@ -34,7 +97,10 @@ function NewsletterContent() {
         if (data.error) {
           setError(data.error);
         } else {
-          setHtml(data.newsletter.full_html);
+          setNewsletter({
+            main_article: data.newsletter.main_article,
+            supporting_articles: data.newsletter.supporting_articles,
+          });
         }
       })
       .catch(() => setError("Failed to load newsletter"))
@@ -45,12 +111,8 @@ function NewsletterContent() {
     return (
       <div className="text-center py-20">
         <div className="animate-spin h-8 w-8 border-2 border-green-500 border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-gray-400">
-          Curating your personalized newsletter...
-        </p>
-        <p className="text-gray-500 text-sm mt-2">
-          This may take a few seconds on first load
-        </p>
+        <p className="text-gray-600">Curating your personalized newsletter...</p>
+        <p className="text-gray-500 text-sm mt-2">This may take a few seconds on first load</p>
       </div>
     );
   }
@@ -63,12 +125,18 @@ function NewsletterContent() {
     );
   }
 
-  if (!html) return null;
+  if (!newsletter) return null;
+
+  const allArticles = [newsletter.main_article, ...newsletter.supporting_articles];
+  const visibleArticles = unlocked ? allArticles : allArticles.slice(0, 2);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">Your FitBrief</h1>
-      <p className="text-gray-400 mb-8">
+      <a href="/topics" className="inline-flex items-center text-gray-500 hover:text-gray-900 text-sm mb-4 transition-colors">
+        &larr; Back to Topics
+      </a>
+      <h1 className="text-3xl font-bold mb-1">Your FitBrief</h1>
+      <p className="text-gray-600 mb-8">
         {new Date().toLocaleDateString("en-IN", {
           weekday: "long",
           year: "numeric",
@@ -77,13 +145,16 @@ function NewsletterContent() {
         })}
       </p>
 
-      {unlocked ? (
-        <NewsletterFull html={html} />
-      ) : (
-        <>
-          <NewsletterTeaser html={html} />
+      <div className="grid grid-cols-2 gap-6">
+        {visibleArticles.map((article, i) => (
+          <ArticleCard key={i} article={article} index={i} featured={i === 0} />
+        ))}
+      </div>
+
+      {!unlocked && (
+        <div className="relative mt-[-60px] pt-20 bg-gradient-to-t from-white via-white to-transparent">
           <PhoneGate topics={topics} onUnlock={() => setUnlocked(true)} />
-        </>
+        </div>
       )}
     </div>
   );
@@ -91,12 +162,12 @@ function NewsletterContent() {
 
 export default function NewsletterPage() {
   return (
-    <main className="min-h-screen bg-gray-900 text-white py-12 px-6">
-      <div className="max-w-2xl mx-auto">
+    <main className="min-h-screen bg-white text-gray-900 py-12 px-6">
+      <div className="max-w-3xl mx-auto">
         <Suspense
           fallback={
             <div className="text-center py-20">
-              <p className="text-gray-400">Loading...</p>
+              <p className="text-gray-600">Loading...</p>
             </div>
           }
         >

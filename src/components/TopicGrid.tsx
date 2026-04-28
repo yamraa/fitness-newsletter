@@ -29,8 +29,8 @@ export default function TopicGrid({ selected, onToggle }: TopicGridProps) {
             onClick={() => onToggle(topic)}
             className={`p-4 rounded-xl border-2 transition-all text-left ${
               isSelected
-                ? "border-green-500 bg-green-500/10 text-white"
-                : "border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-400"
+                ? "border-green-500 bg-green-50 text-gray-900"
+                : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
             }`}
           >
             <span className="text-2xl block mb-2">{TOPIC_ICONS[topic]}</span>

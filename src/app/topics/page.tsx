@@ -37,10 +37,10 @@ export default function TopicsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white py-12 px-6">
+    <main className="min-h-screen bg-white text-gray-900 py-12 px-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-2">What interests you?</h1>
-        <p className="text-gray-400 mb-8">
+        <p className="text-gray-600 mb-8">
           Pick one or more fitness topics to build your personalized newsletter.
         </p>
 
@@ -52,8 +52,8 @@ export default function TopicsPage() {
             disabled={selected.length === 0}
             className={`px-8 py-3 rounded-lg font-semibold text-lg transition-colors ${
               selected.length > 0
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "bg-gray-700 text-gray-500 cursor-not-allowed"
+                ? "bg-emerald-700 hover:bg-emerald-800 text-white"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
             Build My Newsletter ({selected.length} selected)

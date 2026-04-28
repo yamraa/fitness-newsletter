@@ -21,8 +21,8 @@ export async function getCachedNewsletter(
 
 export async function saveCachedNewsletter(
   topics: string[],
-  mainArticleId: string,
-  supportingArticles: { id: string; title: string; summary: string; source_url: string }[],
+  mainArticle: { title: string; source_url: string; topic: string; deep_read_content: string; image_url?: string },
+  supportingArticles: { title: string; source_url: string; topic: string; summary: string; image_url?: string }[],
   fullHtml: string
 ): Promise<CachedNewsletter> {
   const topicsHash = hashTopics(topics);
@@ -34,7 +34,7 @@ export async function saveCachedNewsletter(
       topics_hash: topicsHash,
       topics,
       date: today,
-      main_article_id: mainArticleId,
+      main_article: mainArticle,
       supporting_articles: supportingArticles,
       full_html: fullHtml,
     })

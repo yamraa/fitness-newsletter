@@ -1,6 +1,8 @@
 import Parser from "rss-parser";
 
-const parser = new Parser();
+const parser = new Parser({
+  timeout: 5000,
+});
 
 interface RawArticle {
   title: string;
@@ -26,9 +28,7 @@ const RSS_FEEDS: Record<string, string[]> = {
   "Running & Cardio": [
     "https://www.runnersworld.com/rss/all.xml/",
   ],
-  "Supplements": [
-    "https://examine.com/rss/",
-  ],
+  "Supplements": [],
   "Mental Health & Mindfulness": [
     "https://www.mindful.org/feed/",
   ],
@@ -37,26 +37,25 @@ const RSS_FEEDS: Record<string, string[]> = {
   ],
 };
 
-async function fetchFromGoogleCSE(topic: string): Promise<RawArticle[]> {
-  const apiKey = process.env.GOOGLE_CSE_API_KEY;
-  const cx = process.env.GOOGLE_CSE_CX;
-  if (!apiKey || !cx) return [];
+async function fetchFromSerpAPI(topic: string): Promise<RawArticle[]> {
+  const apiKey = process.env.SERPAPI_KEY;
+  if (!apiKey) return [];
 
   const query = encodeURIComponent(`${topic} fitness blog`);
-  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}&num=5&dateRestrict=d7`;
+  const url = `https://serpapi.com/search.json?engine=google&q=${query}&num=5&api_key=${apiKey}&tbs=qdr:w`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
-    if (!data.items) return [];
+    if (!data.organic_results) return [];
 
-    return data.items.map((item: { title: string; link: string }) => ({
+    return data.organic_results.map((item: { title: string; link: string }) => ({
       title: item.title,
       url: item.link,
       topic,
     }));
   } catch {
-    console.error(`Google CSE fetch failed for topic: ${topic}`);
+    console.error(`SerpAPI fetch failed for topic: ${topic}`);
     return [];
   }
 }
@@ -88,7 +87,7 @@ export async function fetchArticlesForTopics(
   const allArticles: RawArticle[] = [];
 
   const fetches = topics.flatMap((topic) => [
-    fetchFromGoogleCSE(topic),
+    fetchFromSerpAPI(topic),
     fetchFromRSS(topic),
   ]);
 
