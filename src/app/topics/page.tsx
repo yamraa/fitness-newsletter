@@ -15,7 +15,7 @@ export default function TopicsPage() {
       fetch(`/api/users?phone=${encodeURIComponent(savedPhone)}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.user) {
+          if (data.user && data.user.topics) {
             setSelected(data.user.topics);
           }
         });

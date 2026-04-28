@@ -1,10 +1,11 @@
 export interface User {
   id: string;
-  name: string;
+  creator_name: string;
+  country_code: string;
   phone: string;
+  answers: Record<string, number>;
   topics: string[];
   created_at: string;
-  updated_at: string;
 }
 
 export interface Article {

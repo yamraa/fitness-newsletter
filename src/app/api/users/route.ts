@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check if user already exists by phone
+  // Check if user already exists by phone in quizzes table
   const { data: existingUser } = await supabase
-    .from("users")
+    .from("quizzes")
     .select("*")
     .eq("phone", phone)
     .single();
@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
   if (existingUser) {
     // Update their topics
     const { data, error } = await supabase
-      .from("users")
-      .update({ name, topics, updated_at: new Date().toISOString() })
+      .from("quizzes")
+      .update({ creator_name: name, topics })
       .eq("phone", phone)
       .select()
       .single();
@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ user: data });
   }
 
-  // Create new user
+  // Create new entry in quizzes
   const { data, error } = await supabase
-    .from("users")
-    .insert({ name, phone, topics })
+    .from("quizzes")
+    .insert({ creator_name: name, country_code: "+91", phone, topics, answers: {} })
     .select()
     .single();
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("users")
+    .from("quizzes")
     .select("*")
     .eq("phone", phone)
     .single();
