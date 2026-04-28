@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "placeholder" });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "placeholder",
+  baseURL: "https://openrouter.ai/api/v1",
+});
 
 interface RawArticle {
   title: string;
